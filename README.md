@@ -6,9 +6,7 @@ CareDesk is a clinic operations demo built with **Laravel 10**, **Vue 3**, **Vit
 
 ## Dashboard Preview
 
-![CareDesk dashboard preview](docs/images/caredesk-dashboard-preview.png)
-
-> The image is an illustrative preview based on the application's actual dashboard layout. It uses fictional sample values and is not a screenshot of a live clinic system.
+A verified browser screenshot has not been committed yet. The README intentionally avoids using an illustrative mockup as a substitute for a real application capture.
 
 ## Features
 
