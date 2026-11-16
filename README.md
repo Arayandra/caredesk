@@ -1,5 +1,7 @@
 # CareDesk — Clinic Operations Workspace
 
+![CareDesk CI](https://github.com/Arayandra/caredesk/actions/workflows/ci.yml/badge.svg)
+
 CareDesk is a clinic operations demo built with **Laravel 10**, **Vue 3**, **Vite**, and **MySQL**. It provides a single-page workspace for managing patient profiles, appointments, medical staff, consultation notes, and operational reports.
 
 ## Dashboard Preview
@@ -114,19 +116,30 @@ Run `php artisan migrate --seed` to load fictional doctors, patient profiles, ap
 
 **This repository is a development/demo project and is not ready for production use with real patient information.** The current API routes do not enforce authentication or role-based access, even though Laravel Sanctum is included as a dependency. Anyone able to reach the API can potentially read or modify clinic records. Before deployment, implement and enforce authentication, authorization policies/roles, audit logging, secure backup/retention, HTTPS, rate limiting, and appropriate privacy controls. Do not expose this demo instance to the public internet or enter real patient data.
 
-Other limitations to address before production include appointment collision checking on updates, validation that a consultation's linked patient/doctor match its appointment, and a review of patient deletion behavior because foreign-key cascades can remove associated records.
-
 ## Tests and Verification
 
-The ZIP includes Laravel's example PHPUnit tests, but it does not yet include a comprehensive test suite for patient, appointment, consultation, and reporting workflows. Run the following commands after installing dependencies and configuring the database:
+The repository includes feature tests for patient registration, appointment scheduling conflicts (including updates), consultation-to-appointment validation, patient-history deletion protection, and dashboard/report responses.
+
+The GitHub Actions workflow runs these checks on pushes to `main` and pull requests:
+
+- Install Composer and npm dependencies.
+- Build the Vue frontend with Vite.
+- Run MySQL migrations and seed fictional demo data in a disposable CI database.
+- Run the Laravel test suite (**8 tests, 44 assertions** in the verified run).
+- Start the Laravel development server and make HTTP requests to the home page and dashboard API.
+- Verify the registered Laravel routes.
+
+See [the latest workflow runs](https://github.com/Arayandra/caredesk/actions).
+
+To run checks locally after installing dependencies and configuring a disposable test database:
 
 ```cmd
 php artisan test
 php artisan route:list
-php artisan migrate:fresh --seed
+npm run build
 ```
 
-`migrate:fresh` drops all existing tables in the configured database. Use it only with a disposable development database.
+> `php artisan migrate:fresh --seed` drops and recreates all tables in the configured database. Use it only with a disposable development database.
 
 ---
 
