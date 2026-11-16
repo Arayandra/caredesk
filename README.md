@@ -97,7 +97,9 @@ For frontend hot reload during development, use a second CMD window and run `npm
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| POST | `/api/auth/login` | Sign in and issue a Sanctum bearer token (5 attempts/minute) |\n| POST | `/api/auth/logout` | Revoke the current bearer token |\n| GET | `/api/dashboard` | Dashboard statistics and recent activity (authenticated) |
+| POST | `/api/auth/login` | Sign in and issue a Sanctum bearer token (5 attempts/minute) |
+| POST | `/api/auth/logout` | Revoke the current bearer token |
+| GET | `/api/dashboard` | Dashboard statistics and recent activity (authenticated) |
 | GET, POST | `/api/pasiens` | List/search and create patients |
 | GET, PUT, DELETE | `/api/pasiens/{id}` | Read, edit, and delete a patient |
 | GET | `/api/doctors` | List doctors |
