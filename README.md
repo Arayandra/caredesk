@@ -156,8 +156,20 @@ npm run build
 Built as a clinic workflow demonstration with Laravel and Vue.
 
 
-## Framework maintenance
+## Framework upgrade plan
 
-CareDesk currently uses Laravel 10 and PHP 8.1+. Laravel 10 has passed its official security-support period. Before any public deployment, plan a staged upgrade to a supported Laravel release using PHP 8.3+, then re-run the existing clinic feature suite, database migrations, Vue build, and HTTP smoke tests.
+**Current baseline:** Laravel 10 (`^10.10`) and PHP 8.1+. Laravel 10 security support ended on **4 February 2025**. The green CI workflow validates this existing Laravel 10 baseline; it does not make the framework release supported.
 
-The current successful CI run validates the existing Laravel 10 codebase only. It does not remove the separate production limitation documented above: API authentication and role-based authorization must be implemented before any real patient information is used.
+**Target:** Laravel 13 with PHP 8.3 or later. Laravel 13 was released on 17 March 2026 and requires PHP 8.3+. This upgrade has **not** been applied to the Composer manifest or lockfile.
+
+Recommended sequence:
+
+1. Create a dedicated `upgrade/laravel-13` branch and preserve the current green CI baseline.
+2. Move the development and CI runtime to PHP 8.3+ (PHP 8.4 is a reasonable initial target after checking the deployment host and extensions).
+3. Check every direct dependency against Laravel 13 before changing constraints. In particular, verify Sanctum, PHPUnit, Collision, Sail, and Laravel Ignition compatibility. Use `composer why-not laravel/framework ^13.0` to identify blockers; do not force a blanket major-version update.
+4. Resolve framework and package breaking changes, then run migrations against a disposable database and verify login/token issuance, token revocation, patient and appointment flows, consultations, reports, and route registration.
+5. Require `composer validate`, `composer audit`, `php artisan test`, `php artisan route:list`, `npm run build`, HTTP smoke tests, and a green GitHub Actions run before merging. Regenerate and commit `composer.lock` only after the dependency set is validated.
+
+See the [official Laravel release and support policy](https://laravel.com/framework/docs/releases) and the [Laravel 13 upgrade guide](https://laravel.com/docs/13.x/upgrade).
+
+The current CI success is evidence for the Laravel 10 codebase only. It does not remove the production limitations documented above: role-based authorization, audit logging, secure backup/retention, HTTPS hardening, and formal privacy controls are still required before real patient information is used.
