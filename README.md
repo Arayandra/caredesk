@@ -110,6 +110,16 @@ For frontend hot reload during development, use a second CMD window and run `npm
 
 Run `php artisan migrate --seed` to load fictional doctors, patient profiles, appointments, and consultation notes. Seeder records are demonstration data only and are not real patient records.
 
+To create a staff login through the demo seeder, add these values to your local `.env` before running the seeder (use a unique strong password of at least 12 characters):
+
+```dotenv
+CAREDESK_DEMO_NAME="Clinic Demo Staff"
+CAREDESK_DEMO_EMAIL=staff@example.test
+CAREDESK_DEMO_PASSWORD="replace-with-a-unique-strong-password"
+```
+
+The seeder creates that staff account only when a valid email and password are supplied. No default public password is embedded in the repository. In CI, a disposable test-only staff account is created so the authenticated dashboard smoke test can run.
+
 ## Security and Production Limitations
 
 **This repository is a development/demo project and is not ready for production use with real patient information.** Clinic API endpoints now require a Sanctum bearer token. Sign in with `POST /api/auth/login` using an existing staff account, then send `Authorization: Bearer <token>` with API requests. `POST /api/auth/logout` revokes the current token. The login endpoint is rate-limited. Role-based authorization, audit logging, secure backup/retention, HTTPS deployment hardening, and formal privacy controls are not yet implemented. Do not expose this demo instance to the public internet or enter real patient data.
