@@ -139,7 +139,7 @@ The GitHub Actions workflow runs these checks on pushes to `main` and pull reque
 - Install Composer and npm dependencies.
 - Build the Vue frontend with Vite.
 - Run MySQL migrations and seed fictional demo data in a disposable CI database.
-- Run the Laravel test suite (**8 tests, 44 assertions** in the verified run).
+- Run the Laravel test suite (**11 tests, 54 assertions** in the latest verified run on 16 November 2026).
 - Start the Laravel development server and make HTTP requests to the home page and dashboard API.
 - Verify the registered Laravel routes.
 
@@ -177,3 +177,9 @@ Recommended sequence:
 See the [official Laravel release and support policy](https://laravel.com/framework/docs/releases) and the [Laravel 13 upgrade guide](https://laravel.com/docs/13.x/upgrade).
 
 The current CI success is evidence for the Laravel 10 codebase only. It does not remove the production limitations documented above: role-based authorization, audit logging, secure backup/retention, HTTPS hardening, and formal privacy controls are still required before real patient information is used.
+
+## Latest CI verification
+
+Verified on **16 November 2026** on branch `main`: **11 PHPUnit tests passed (54 assertions)**. The workflow also installs Composer and npm dependencies, builds the Vue frontend, runs fresh migrations and demo seeders, verifies seeded staff credentials, authenticates against the dashboard API, and checks Laravel route registration.
+
+The authenticated HTTP smoke test passed. This validates the demo workflow in CI, not production readiness or authorization policy completeness.
