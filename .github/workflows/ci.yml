@@ -76,5 +76,22 @@ jobs:
       - name: Run automated tests
         run: php artisan test
 
+      - name: Smoke-test the running application
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/caredesk-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+
+          for attempt in {1..20}; do
+            if curl --silent --fail http://127.0.0.1:8000/ -o /tmp/caredesk-home.html; then
+              break
+            fi
+            sleep 1
+          done
+
+          grep -q 'CareDesk' /tmp/caredesk-home.html
+          curl --silent --show-error --fail http://127.0.0.1:8000/api/dashboard > /tmp/caredesk-dashboard.json
+          php -r '$data = json_decode(file_get_contents("/tmp/caredesk-dashboard.json"), true); if (!isset($data["stats"]["patients"], $data["week"])) { fwrite(STDERR, "Invalid dashboard response\\n"); exit(1); } echo "HTTP smoke test passed\\n";'
+
       - name: Verify Laravel routes
         run: php artisan route:list --except-vendor
