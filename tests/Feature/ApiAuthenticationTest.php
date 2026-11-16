@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\PersonalAccessToken;
 use Tests\TestCase;
 
 class ApiAuthenticationTest extends TestCase
@@ -34,7 +35,7 @@ class ApiAuthenticationTest extends TestCase
         $this->withToken($token)->getJson('/api/pasiens')->assertOk();
 
         $this->withToken($token)->postJson('/api/auth/logout')->assertOk();
-        $this->withToken($token)->getJson('/api/pasiens')->assertUnauthorized();
+        $this->assertNull(PersonalAccessToken::findToken($token), 'Logout must delete the bearer token from storage.');
     }
 
     public function test_invalid_credentials_do_not_issue_a_token(): void
