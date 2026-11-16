@@ -6,12 +6,20 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\MedicalRecord;
 use App\Models\Pasien;
+use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ClinicApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Sanctum::actingAs(User::factory()->create());
+    }
 
     public function test_a_patient_can_be_registered_through_the_api(): void
     {

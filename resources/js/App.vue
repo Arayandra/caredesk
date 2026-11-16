@@ -2,6 +2,11 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import axios from 'axios';
 
+const authToken = ref(sessionStorage.getItem('caredesk_api_token') || '');
+const loginForm = reactive({ email: '', password: '' });
+const loginError = ref('');
+if (authToken.value) axios.defaults.headers.common.Authorization = 'Bearer ' + authToken.value;
+
 const view = ref('dashboard');
 const loading = ref(true);
 const busy = ref(false);
@@ -38,6 +43,13 @@ function notify(message, type = 'success') {
     toastTimer = setTimeout(() => { toast.value.show = false; }, 3300);
 }
 function friendlyError(error) {
+    if (error.response?.status === 401) {
+        sessionStorage.removeItem('caredesk_api_token');
+        authToken.value = '';
+        delete axios.defaults.headers.common.Authorization;
+        loginError.value = 'Sesi berakhir. Silakan masuk kembali.';
+        return loginError.value;
+    }
     if (error.response?.status === 422) {
         errors.value = error.response.data.errors || {};
         return 'Periksa kembali data yang wajib diisi.';
@@ -50,6 +62,39 @@ async function loadAppointments() { const params = {}; if (dateFilter.value) par
 async function loadDoctors() { const r = await axios.get('/api/doctors'); doctors.value = r.data.data || []; }
 async function loadRecords() { const r = await axios.get('/api/records'); records.value = r.data.data || []; }
 async function loadReport() { const r = await axios.get('/api/reports'); report.value = r.data; }
+async function signIn() {
+    busy.value = true;
+    loginError.value = '';
+    try {
+        const response = await axios.post('/api/auth/login', loginForm);
+        authToken.value = response.data.token;
+        sessionStorage.setItem('caredesk_api_token', response.data.token);
+        axios.defaults.headers.common.Authorization = 'Bearer ' + response.data.token;
+        loginForm.password = '';
+        await refreshAll();
+    } catch (error) {
+        loginError.value = error.response?.data?.message || 'Tidak dapat masuk. Periksa koneksi server.';
+    } finally {
+        busy.value = false;
+    }
+}
+async function signOut() {
+    try {
+        await axios.post('/api/auth/logout');
+    } catch (error) {
+        // The token may already have been revoked or expired.
+    } finally {
+        sessionStorage.removeItem('caredesk_api_token');
+        authToken.value = '';
+        delete axios.defaults.headers.common.Authorization;
+        patients.value = [];
+        appointments.value = [];
+        doctors.value = [];
+        records.value = [];
+        dashboard.value = { stats: {}, week: [], todayAppointments: [], recentRecords: [] };
+    }
+}
+
 async function refreshAll() {
     loading.value = true;
     try { await Promise.all([loadDashboard(), loadPatients(), loadAppointments(), loadDoctors(), loadRecords(), loadReport()]); }
@@ -120,11 +165,26 @@ function exportPatients() {
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
     const link = document.createElement('a'); link.href = url; link.download = 'direktori-pasien.csv'; link.click(); URL.revokeObjectURL(url);
 }
-onMounted(refreshAll);
+onMounted(() => { if (authToken.value) refreshAll(); else loading.value = false; });
 </script>
 
 <template>
-<div class="app-shell">
+<div v-if="!authToken" class="app-shell" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#f4f7f8">
+    <section class="panel" style="width:min(100%,440px);padding:36px">
+        <a class="brand" href="#" @click.prevent><span class="brand-mark">✚</span><span><b>CareDesk</b><small>CLINIC WORKSPACE</small></span></a>
+        <div class="eyebrow" style="margin-top:32px">SECURE STAFF ACCESS</div>
+        <h1 style="margin:8px 0">Welcome back<span>.</span></h1>
+        <p style="margin-bottom:24px">Masuk untuk membuka workspace operasional klinik.</p>
+        <form class="modal-form" @submit.prevent="signIn">
+            <div class="form-field"><label>Email</label><input v-model.trim="loginForm.email" type="email" autocomplete="username" required placeholder="staff@example.com"></div>
+            <div class="form-field"><label>Password</label><input v-model="loginForm.password" type="password" autocomplete="current-password" required placeholder="Password akun"></div>
+            <p v-if="loginError" role="alert" style="color:#b42318;margin:8px 0">{{ loginError }}</p>
+            <button class="btn btn-primary" type="submit" :disabled="busy" style="width:100%;justify-content:center">{{ busy ? 'Signing in...' : 'Sign in' }}</button>
+        </form>
+        <p style="margin-top:20px;font-size:12px;color:#667085">Gunakan akun staff yang telah dibuat pada database aplikasi. Jangan gunakan data pasien nyata pada demo publik.</p>
+    </section>
+</div>
+<div v-else class="app-shell">
     <aside class="sidebar" :class="{ 'sidebar-open': false }">
         <a class="brand" href="#" @click.prevent="changeView('dashboard')"><span class="brand-mark">✚</span><span><b>CareDesk</b><small>CLINIC WORKSPACE</small></span></a>
         <div class="side-label">WORKSPACE</div>
@@ -135,7 +195,7 @@ onMounted(refreshAll);
     </aside>
 
     <main class="main-area">
-        <header class="topbar"><div class="mobile-brand"><span class="brand-mark">✚</span><b>CareDesk</b></div><div class="crumb"><span>Clinic workspace</span><b>/</b><strong>{{ currentNav.label }}</strong></div><div class="top-actions"><span class="system-pill"><i></i> System online</span><button class="icon-button" title="Muat ulang data" @click="refreshAll">⟳</button><span class="avatar-small">CD</span></div></header>
+        <header class="topbar"><div class="mobile-brand"><span class="brand-mark">✚</span><b>CareDesk</b></div><div class="crumb"><span>Clinic workspace</span><b>/</b><strong>{{ currentNav.label }}</strong></div><div class="top-actions"><span class="system-pill"><i></i> System online</span><button class="icon-button" title="Muat ulang data" @click="refreshAll">⟳</button><button class="icon-button" type="button" title="Keluar dari CareDesk" @click="signOut">Sign out</button><span class="avatar-small">CD</span></div></header>
         <div class="content-wrap">
             <section v-if="view === 'dashboard'">
                 <div class="page-heading"><div><div class="eyebrow">{{ new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date()) }}</div><h1>Good day, clinic team<span>.</span></h1><p>Berikut ringkasan aktivitas dan hal yang perlu ditangani hari ini.</p></div><button class="btn btn-primary" @click="openAppointment">＋ New appointment</button></div>

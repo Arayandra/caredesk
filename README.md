@@ -27,7 +27,7 @@ A verified browser screenshot has not been committed yet. The README intentional
 | Styling | CSS, Tailwind/PostCSS toolchain |
 | Database | MySQL / MariaDB |
 | HTTP client | Axios |
-| API package | Laravel Sanctum (installed; authentication is not yet applied to the clinic API routes) |
+| API package | Laravel Sanctum (bearer-token authentication for the clinic API) |
 
 ## Requirements
 
@@ -97,7 +97,7 @@ For frontend hot reload during development, use a second CMD window and run `npm
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| GET | `/api/dashboard` | Dashboard statistics and recent activity |
+| POST | `/api/auth/login` | Sign in and issue a Sanctum bearer token (5 attempts/minute) |\n| POST | `/api/auth/logout` | Revoke the current bearer token |\n| GET | `/api/dashboard` | Dashboard statistics and recent activity (authenticated) |
 | GET, POST | `/api/pasiens` | List/search and create patients |
 | GET, PUT, DELETE | `/api/pasiens/{id}` | Read, edit, and delete a patient |
 | GET | `/api/doctors` | List doctors |
@@ -112,11 +112,11 @@ Run `php artisan migrate --seed` to load fictional doctors, patient profiles, ap
 
 ## Security and Production Limitations
 
-**This repository is a development/demo project and is not ready for production use with real patient information.** The current API routes do not enforce authentication or role-based access, even though Laravel Sanctum is included as a dependency. Anyone able to reach the API can potentially read or modify clinic records. Before deployment, implement and enforce authentication, authorization policies/roles, audit logging, secure backup/retention, HTTPS, rate limiting, and appropriate privacy controls. Do not expose this demo instance to the public internet or enter real patient data.
+**This repository is a development/demo project and is not ready for production use with real patient information.** Clinic API endpoints now require a Sanctum bearer token. Sign in with `POST /api/auth/login` using an existing staff account, then send `Authorization: Bearer <token>` with API requests. `POST /api/auth/logout` revokes the current token. The login endpoint is rate-limited. Role-based authorization, audit logging, secure backup/retention, HTTPS deployment hardening, and formal privacy controls are not yet implemented. Do not expose this demo instance to the public internet or enter real patient data.
 
 ## Tests and Verification
 
-The repository includes feature tests for patient registration, appointment scheduling conflicts (including updates), consultation-to-appointment validation, patient-history deletion protection, and dashboard/report responses.
+The repository includes feature tests for Sanctum-protected API authentication, token issuance/revocation, patient registration, appointment scheduling conflicts (including updates), consultation-to-appointment validation, patient-history deletion protection, and dashboard/report responses.
 
 The GitHub Actions workflow runs these checks on pushes to `main` and pull requests:
 
