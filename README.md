@@ -29,6 +29,10 @@ A verified browser screenshot has not been committed yet. The README intentional
 | HTTP client | Axios |
 | API package | Laravel Sanctum (bearer-token authentication for the clinic API) |
 
+## Dependency lockfiles
+
+`composer.lock` is committed. The repository does not currently include `package-lock.json`; run `npm install` in the project root and commit the generated lockfile before relying on deterministic frontend dependency installation. After that, switch the CI frontend install step to `npm ci`.
+
 ## Requirements
 
 - PHP 8.1 or later, with Laravel-required extensions enabled (including `ctype`, `fileinfo`, `mbstring`, `openssl`, `PDO`, `tokenizer`, and `xml`).
