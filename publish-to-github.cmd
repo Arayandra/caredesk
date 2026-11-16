@@ -3,7 +3,7 @@ setlocal EnableExtensions
 
 set "REPO_URL=https://github.com/Arayandra/caredesk.git"
 set "BRANCH=main"
-set "SOURCE_DIR=%~dp0."
+for %%I in ("%~dp0.") do set "SOURCE_DIR=%%~fI"
 set "WORK_DIR=%TEMP%\caredesk-publish-%RANDOM%-%RANDOM%"
 
 echo ============================================
@@ -17,7 +17,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist "%SOURCE_DIR%artisan" (
+if not exist "%SOURCE_DIR%\artisan" (
   echo ERROR: artisan was not found. Run this script in the project root.
   pause
   exit /b 1
@@ -51,7 +51,7 @@ if not errorlevel 1 (
 )
 git -C "%WORK_DIR%" -c core.autocrlf=true commit -m "Publish CareDesk Laravel Vue application"
 if errorlevel 1 (
-  echo ERROR: Commit failed. Configure git user.name and git user.email if needed.
+  echo ERROR: Commit failed. Configure git user.name and user.email if needed.
   pause
   exit /b 1
 )

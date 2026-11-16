@@ -4,7 +4,7 @@ CareDesk is a clinic operations demo built with **Laravel 10**, **Vue 3**, **Vit
 
 ## Dashboard Preview
 
-![CareDesk dashboard preview](docs/images/caredesk-dashboard-preview.svg)
+![CareDesk dashboard preview](docs/images/caredesk-dashboard-preview.png)
 
 > The image is an illustrative preview based on the application's actual dashboard layout. It uses fictional sample values and is not a screenshot of a live clinic system.
 
@@ -114,7 +114,7 @@ Run `php artisan migrate --seed` to load fictional doctors, patient profiles, ap
 
 **This repository is a development/demo project and is not ready for production use with real patient information.** The current API routes do not enforce authentication or role-based access, even though Laravel Sanctum is included as a dependency. Anyone able to reach the API can potentially read or modify clinic records. Before deployment, implement and enforce authentication, authorization policies/roles, audit logging, secure backup/retention, HTTPS, rate limiting, and appropriate privacy controls. Do not expose this demo instance to the public internet or enter real patient data.
 
-Appointment collision checks are performed by the application on create and update, but a database-level concurrency-safe booking constraint is still recommended before production. Consultation creation validates that its linked patient and doctor match the appointment. Patient deletion is blocked when appointment or consultation history exists. These safeguards reduce accidental inconsistencies but do not replace authorization, audit trails, and a formal clinical data-retention policy.
+Other limitations to address before production include appointment collision checking on updates, validation that a consultation's linked patient/doctor match its appointment, and a review of patient deletion behavior because foreign-key cascades can remove associated records.
 
 ## Tests and Verification
 

@@ -1,0 +1,4 @@
+<?php
+namespace App\Http\Controllers\Api;
+use App\Http\Controllers\Controller;use App\Models\Appointment;use Illuminate\Support\Facades\DB;
+class ReportController extends Controller { public function __invoke(){ $start=now()->startOfMonth();$end=now()->endOfMonth();$total=Appointment::whereBetween('scheduled_at',[$start,$end])->count();$done=Appointment::whereBetween('scheduled_at',[$start,$end])->where('status','Selesai')->count();$byService=Appointment::select('service_name',DB::raw('count(*) as total'))->whereBetween('scheduled_at',[$start,$end])->groupBy('service_name')->orderByDesc('total')->get();$days=collect(range(6,0))->map(function($i){$d=now()->subDays($i);return ['label'=>$d->format('d M'),'total'=>Appointment::whereDate('scheduled_at',$d)->count()];});return response()->json(['month'=>now()->translatedFormat('F Y'),'total'=>$total,'completed'=>$done,'completionRate'=>$total?round($done/$total*100):0,'byService'=>$byService,'daily'=>$days]);} }
