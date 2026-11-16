@@ -142,3 +142,10 @@ npm run build
 ---
 
 Built as a clinic workflow demonstration with Laravel and Vue.
+
+
+## Framework maintenance
+
+CareDesk currently uses Laravel 10 and PHP 8.1+. Laravel 10 has passed its official security-support period. Before any public deployment, plan a staged upgrade to a supported Laravel release using PHP 8.3+, then re-run the existing clinic feature suite, database migrations, Vue build, and HTTP smoke tests.
+
+The current successful CI run validates the existing Laravel 10 codebase only. It does not remove the separate production limitation documented above: API authentication and role-based authorization must be implemented before any real patient information is used.
