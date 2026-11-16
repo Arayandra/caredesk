@@ -87,6 +87,13 @@ jobs:
       - name: Run automated tests
         run: php artisan test
 
+      - name: Restore demo records for authenticated HTTP smoke test
+        run: php artisan db:seed --force
+        env:
+          CAREDESK_DEMO_NAME: CareDesk CI
+          CAREDESK_DEMO_EMAIL: staff@caredesk.test
+          CAREDESK_DEMO_PASSWORD: ci-caredesk-password
+
       - name: Smoke-test the running application
         run: |
           php artisan serve --host=127.0.0.1 --port=8000 > /tmp/caredesk-server.log 2>&1 &
